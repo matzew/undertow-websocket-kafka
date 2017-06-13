@@ -1,0 +1,80 @@
+= Undertow WebSocket Bridge for Apache Kafka
+
+A demo that shows how the Undertow WebSocket API can be used to write incoming data to a Kafka topic
+
+== Running on Openshift
+
+Login to your Openshift cluster, or simply start a local instance using the https://github.com/openshift/origin/releases/latest[oc binaries], by executing:
+
+[source,bash]
+----
+oc cluster up
+----
+
+Once logged in, create a new project:
+
+[source,bash]
+----
+oc new-project kaftow
+----
+
+=== Adding Apache Zookeeper and Apache Kafka
+
+In this project we need to add Apache Kafka and its Zookeeper, by using a _simple_ in-memory installation.
+It is recommended to download https://github.com/EnMasseProject/barnabas/tree/master/kafka-inmemory/resources[these files]
+and run the following:
+
+[source,bash]
+----
+oc create -f zookeeper.yaml
+oc create -f zookeeper-service.yaml
+
+oc create -f kafka.yaml
+oc create -f kafka-service.yaml
+----
+
+=== Deploying the Java Application
+
+This gives you the cluster you need, and now you can deploy the Undertow server to the same project by running
+
+[source,bash]
+----
+mvn fabric8:deploy -Popenshift
+----
+
+
+=== Testing
+
+==== kafkacat CLI
+
+Now that the Java app is also deployed you can use the nice https://github.com/edenhill/kafkacat[kafkacat] tool to connect to the `websocket_bridge` of our new project:
+
+[source,bash]
+----
+oc get services
+----
+
+Use the `CLUSTER-IP` of the `kafka` service, and run:
+
+[source,bash]
+----
+./kafkacat -C -b CLUSTER-IP:9092 -t websocket_bridge
+----
+
+This will give you a `Connected` message that is written, once the Undertow app is fully deployed!
+
+
+==== WebSocket application in the browser
+
+In the Openshift Console open the `nip.io` Link:
+
+image::overview.png
+
+This leads you a simple website, that captures mouse events from the browser, sends them to Undertow, via WebSocket.
+
+The WebSocket connection handler than sends the data to the `websocket_bridge`.
+
+check you `kafkacat` client to see the logs ;-)
+
+
+
