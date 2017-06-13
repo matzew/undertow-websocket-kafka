@@ -68,7 +68,7 @@ This will give you a `Connected` message that is written, once the Undertow app 
 
 In the Openshift Console open the `nip.io` Link:
 
-image::overview.png
+image:https://raw.githubusercontent.com/matzew/undertow-websocket-kafka/master/overview.png
 
 This leads you a simple website, that captures mouse events from the browser, sends them to Undertow, via WebSocket.
 
