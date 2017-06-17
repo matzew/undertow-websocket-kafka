@@ -2,7 +2,7 @@
 
 	<body>
 
-		<h2>Hello there - this is awesome UI skills</h2>
+		<h2>Hello there - this is awesome UI skills <div id="connector" style="color: green;"></div></h2>
 
 		<div id="mover">
 
@@ -12,7 +12,14 @@
 
 <script>
 var websocket = new WebSocket("ws://" + window.location.host + window.location.pathname + "kafkabridge");
-websocket.onopen = function(evt) {console.log("Connected to WS bridge"); }
+websocket.onopen = function(evt) {
+    document.getElementById("connector").innerHTML = "CONNECTED to " + websocket.url;
+    console.log("Connected to WS bridge");
+}
+websocket.onclose = function(evt) {
+    document.getElementById("connector").innerHTML = "";
+    console.log("Disconnected from WS bridge");
+}
 
 document.onmousemove = function foo(e) {
 	const obj = {};
@@ -21,7 +28,9 @@ document.onmousemove = function foo(e) {
 	var renderedPayload =  JSON.stringify((obj));
 
 	document.getElementById("mover").innerHTML = renderedPayload;
+	if (websocket.readyState == WebSocket.OPEN) {
         websocket.send(renderedPayload);
+	}
 }
 
 
