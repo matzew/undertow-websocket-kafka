@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2017 Matthias Wessendorf.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package net.wessendorf.kafka;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -18,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
+import static net.wessendorf.utils.PropertiesResolverUtils.resolveKafkaService;
 import static org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.*;
 
@@ -25,13 +41,13 @@ public class SimpleConsumer implements Runnable {
 
 
     final Properties properties = new Properties();
-    KafkaConsumer<String, String> consumer;
-    private final static Logger logger = Logger.getLogger(SimpleConsumer.class.getName());
+    final KafkaConsumer<String, String> consumer;
+    private final Logger logger = Logger.getLogger(SimpleConsumer.class.getName());
 
 
 
     public SimpleConsumer() {
-        properties.put(BOOTSTRAP_SERVERS_CONFIG, "172.17.0.5:9092");
+        properties.put(BOOTSTRAP_SERVERS_CONFIG, "172.30.165.38:9092");
         properties.put(GROUP_ID_CONFIG, "foo_bar");
         properties.put(AUTO_OFFSET_RESET_CONFIG, "earliest");
         properties.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -48,19 +64,19 @@ public class SimpleConsumer implements Runnable {
 //        consumer.subscribe(Arrays.asList("websocket_bridge"), new ConsumerRebalanceListener() {
 //            @Override
 //            public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-//                logger.severe(partitions+"");
+//                logger.warn(partitions+"");
 //            }
 //
 //            @Override
 //            public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-//                logger.severe(partitions+"");
+//                logger.warn(partitions+"");
 //                consumer.seekToBeginning(partitions);
 //            }
 //        });
 
 
 
-//        TopicPartition topicPartition = new TopicPartition("websocket_bridge", 0);
+//        final TopicPartition topicPartition = new TopicPartition("websocket_bridge", 0);
 //        consumer.assign(Arrays.asList(topicPartition));
 //        consumer.seekToBeginning(Arrays.asList(topicPartition));
 
@@ -71,7 +87,7 @@ public class SimpleConsumer implements Runnable {
             final ConsumerRecords<String, String> records = consumer.poll(100);
             for (ConsumerRecord<String, String> record : records) {
 
-                logger.severe("got: " + record.value() + " from: " + new Date(record.timestamp()));
+                logger.warning("got: " + record.value() + " from " + new Date(record.timestamp()));
 
             }
         }
@@ -81,7 +97,6 @@ public class SimpleConsumer implements Runnable {
         consumer.wakeup();
     }
 
-
     public static void main(String... args ) throws Exception {
 
         final List<SimpleConsumer> consumers = new ArrayList<>();
@@ -89,9 +104,5 @@ public class SimpleConsumer implements Runnable {
         final SimpleConsumer simpleConsumer = new SimpleConsumer();
         consumers.add(simpleConsumer);
         executor.submit(simpleConsumer);
-
-
     }
-
-
 }
