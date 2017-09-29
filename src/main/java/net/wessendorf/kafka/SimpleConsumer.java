@@ -47,9 +47,9 @@ public class SimpleConsumer implements Runnable {
 
 
     public SimpleConsumer() {
-        properties.put(BOOTSTRAP_SERVERS_CONFIG, "172.30.165.38:9092");
-        properties.put(GROUP_ID_CONFIG, "foo_bar");
-        properties.put(AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(BOOTSTRAP_SERVERS_CONFIG, "172.30.28.181:9092");
+        properties.put(GROUP_ID_CONFIG, "foo_bar1");
+//        properties.put(AUTO_OFFSET_RESET_CONFIG, "earliest");
         properties.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
@@ -59,26 +59,30 @@ public class SimpleConsumer implements Runnable {
     @Override
     public void run() {
 
-        consumer.subscribe(Arrays.asList("websocket_bridge"));
-
-//        consumer.subscribe(Arrays.asList("websocket_bridge"), new ConsumerRebalanceListener() {
-//            @Override
-//            public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
-//                logger.warn(partitions+"");
-//            }
-//
-//            @Override
-//            public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-//                logger.warn(partitions+"");
-//                consumer.seekToBeginning(partitions);
-//            }
-//        });
+    //    consumer.subscribe(Arrays.asList("websocket_bridge"));
 
 
+/*
+        consumer.subscribe(Arrays.asList("websocket_bridge"), new ConsumerRebalanceListener() {
+            @Override
+            public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+                logger.warning(partitions+"");
+            }
 
-//        final TopicPartition topicPartition = new TopicPartition("websocket_bridge", 0);
-//        consumer.assign(Arrays.asList(topicPartition));
-//        consumer.seekToBeginning(Arrays.asList(topicPartition));
+            @Override
+            public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+                logger.warning(partitions+"");
+                //consumer.seekToBeginning(partitions);
+            }
+        });
+*/
+
+
+
+
+        final TopicPartition topicPartition = new TopicPartition("websocket_bridge",0);
+        consumer.assign(Arrays.asList(topicPartition));
+        consumer.seekToBeginning(Arrays.asList(topicPartition));
 
         logger.warning("Done w/ subscribing");
 
@@ -87,8 +91,7 @@ public class SimpleConsumer implements Runnable {
             final ConsumerRecords<String, String> records = consumer.poll(100);
             for (ConsumerRecord<String, String> record : records) {
 
-                logger.warning("got: " + record.value() + " from " + new Date(record.timestamp()));
-
+                logger.warning("got: " + record.value() + " from " + new Date(record.timestamp()) + ", partition: " + record.partition()  );
             }
         }
     }
